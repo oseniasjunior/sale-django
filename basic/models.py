@@ -156,7 +156,7 @@ class Employee(ModelBase):
     department = models.ForeignKey(
         to='Department',
         on_delete=models.DO_NOTHING,
-        db_column='id_departmet',
+        db_column='id_department',
         null=False,
         related_name='employees'
     )

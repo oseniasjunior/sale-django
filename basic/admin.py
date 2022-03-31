@@ -57,3 +57,4 @@ class EmployeeAdmin(admin.ModelAdmin):
     list_display_links = ['id', 'name', 'gender', 'salary', 'modified_at', 'active']
     search_fields = ['name']
     list_filter = ['active']
+    list_per_page = 10
