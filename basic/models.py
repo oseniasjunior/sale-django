@@ -151,7 +151,8 @@ class Employee(ModelBase):
         to='District',
         on_delete=models.DO_NOTHING,
         db_column='id_district',
-        null=False
+        null=False,
+        related_name='employees'
     )
     department = models.ForeignKey(
         to='Department',
@@ -164,12 +165,16 @@ class Employee(ModelBase):
         to='MaritalStatus',
         on_delete=models.DO_NOTHING,
         db_column='id_marital_status',
-        null=False
+        null=False,
+        related_name='employees'
     )
 
     class Meta:
         db_table = 'employee'
         managed = True
+
+    def __str__(self):
+        return f'{self.name} - {self.salary}'
 
 
 class Branch(ModelBase):
