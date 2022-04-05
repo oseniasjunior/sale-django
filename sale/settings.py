@@ -24,7 +24,7 @@ SECRET_KEY = 'django-insecure-uk1x#y%t@7nif&b=60mh57_cyy@49#7u%lvlyq9i3395l7l%81
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'basic.apps.BasicConfig',
+    'rest_framework',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
@@ -134,15 +136,24 @@ LOGGING = {
             'level': 'DEBUG',
             'handlers': ['console'],
         },
-        'django': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            # 'propagate': False,
-        },
-        'django.request': {
-            'level': 'DEBUG',
-            'handlers': ['console'],
-            # 'propagate': False,
-        },
+        # 'django': {
+        #     'level': 'DEBUG',
+        #     'handlers': ['console'],
+        #     # 'propagate': False,
+        # },
+        # 'django.request': {
+        #     'level': 'DEBUG',
+        #     'handlers': ['console'],
+        #     # 'propagate': False,
+        # },
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'COERCE_DECIMAL_TO_STRING': False,
+    'DEFAULT_FILTER_BACKENDS': (
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.OrderingFilter',
+    )
 }

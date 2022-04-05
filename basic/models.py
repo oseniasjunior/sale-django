@@ -1,4 +1,6 @@
+from decimal import Decimal
 from django.db import models
+from basic import managers
 
 
 class ModelBase(models.Model):
@@ -176,6 +178,9 @@ class Employee(ModelBase):
     def __str__(self):
         return f'{self.name} - {self.salary}'
 
+    def adjustment_salary(self, percentage):
+        self.salary += self.salary * (Decimal(percentage) / 100)
+
 
 class Branch(ModelBase):
     name = models.CharField(max_length=64, null=False, unique=True)
@@ -233,6 +238,7 @@ class Sale(ModelBase):
         db_column='id_branch',
         null=False
     )
+    objects = managers.SaleManager()
 
     class Meta:
         db_table = 'sale'

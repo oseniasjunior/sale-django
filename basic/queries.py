@@ -1,9 +1,9 @@
 from basic import models
 from django.db.models import (
     Case, When, Value, Q, F, ExpressionWrapper, FloatField, DurationField, DateField, IntegerField, Func, DateTimeField,
-    CharField, Sum
+    CharField, Sum, OuterRef, Subquery, Exists
 )
-from django.db.models.functions import Now, Cast, ExtractDay, ExtractYear, Extract, LPad, Upper, Lower
+from django.db.models.functions import Now, Cast, ExtractDay, ExtractYear, Extract, LPad, Upper, Lower, ExtractMonth
 
 
 def utilizando_case():
@@ -199,6 +199,47 @@ def exercicio23():
     return models.Employee.objects.order_by('-salary')[10:20]
 
 
+def exercicio24():
+    # Criar uma consulta para trazer o total vendido em valor R$ por zona
+    return models.SaleItem.objects.select_related('sale__branch__district__zone').values(
+        'sale__branch__district__zone__name'
+    ).annotate(
+        total=Sum(ExpressionWrapper(
+            F('quantity') * F('product__sale_price'), output_field=FloatField()
+        ))
+    ).values('sale__branch__district__zone__name', 'total')
+
+
+def exercicio25():
+    # Criar uma consulta para trazer o total vendido em valor R$ por filial;
+    return models.SaleItem.objects.select_related('sale__branch').values(
+        'sale__branch__name'
+    ).annotate(
+        total=Sum(ExpressionWrapper(
+            F('quantity') * F('product__sale_price'), output_field=FloatField()
+        ))
+    ).values('sale__branch__name', 'total')
+
+
+def exercicio26():
+    sbq = models.SaleItem.objects.select_related('sale').filter(
+        product=OuterRef('id')
+    ).values('sale__date').order_by('-sale__date')[:1]
+    return models.Product.objects.annotate(last_sale=Subquery(sbq)).values('id', 'name', 'last_sale')
+
+
+def exercicio27():
+    sbq = models.SaleItem.objects.filter(product=OuterRef('id'), sale__date__year=2021)[:1]
+    return models.Product.objects.annotate(
+        exists=Exists(sbq)
+    ).values('id', 'name', 'exists')
+
+
+def exercicio28():
+    sbq = models.SaleItem.objects.filter(sale__date__year=2021).values_list('product', flat=True).distinct()
+    return models.Product.objects.filter(id__in=sbq).values('id', 'name')
+
+
 #
 # def exercicio21():
 #     # Fazer uma consulta para retornar o nome do produto, subtotal e quanto deve ser pago de comissão por cada item;
@@ -245,10 +286,10 @@ Criar uma consulta para trazer o primeiro nome dos funcionários.
     Sr. Sra. Dr. Dra. remover se tiver.
 Criar uma consulta para trazer o último nome dos clientes.
 Criar uma consulta para rocar quem tenha silva no nome para Oliveira.
-Criar uma consulta para trazer o total de funcionários por estado civil;
-Criar uma consulta para trazer o total vendido em valor R$ por filial;
-Criar uma consulta para trazer o total vendido em valor R$ por zona;
-Criar uma consulta para trazer o total vendido em valor R$ por estado;
+[ok] - Criar uma consulta para trazer o total de funcionários por estado civil;
+[ok] - Criar uma consulta para trazer o total vendido em valor R$ por filial;
+[ok] - Criar uma consulta para trazer o total vendido em valor R$ por zona;
+[ok] - Criar uma consulta para trazer o total vendido em valor R$ por estado;
 Criar uma consulta para trazer o total vendido em quantidade por cidade, trazer apenas as cidades que tiveram vendas acima de quantidade 100;
 Trazer a media de salários por sexo, o sexo deve está de forma descritiva;
 Fazer uma consulta que retorne os 5 grupos de produtos mais lucrativos em termos de valor, os grupos só entram na lista com lucros acima de R$ 200,00;
@@ -257,3 +298,15 @@ Uma consulta para trazer o total vendido em valor por ano;
 Uma consulta para trazer o total vendido em valor por idade de funcionário;
 
 """
+
+
+def sale_by_year():
+    return models.Sale.objects.prefetch_related('saleitem_set').annotate(
+        year=ExtractYear('date'),
+        month=ExtractMonth('date'),
+    ).values('year', 'month').annotate(
+        total=Sum(ExpressionWrapper(
+            F('saleitem__quantity') * F('saleitem__product__sale_price'),
+            output_field=FloatField()
+        )),
+    ).values('year', 'month', 'total').order_by('-year', '-month')
