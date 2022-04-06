@@ -55,6 +55,7 @@ class StateModelViewSet(viewsets.ModelViewSet):
 class EmployeeModelViewSet(viewsets.ModelViewSet):
     queryset = models.Employee.objects.all()
     serializer_class = serializers.EmployeeSerializer
+    filter_class = filters.EmployeeFilter
 
     @action(methods=['PATCH'], detail=True)
     def adjustment_salary(self, request, *args, **kwargs):
@@ -97,3 +98,9 @@ class SaleModelViewSet(viewsets.ModelViewSet):
         #     context=self.get_serializer_context()
         # )
         return Response(data=queryset, status=200)
+
+
+class ProductModelViewSet(viewsets.ModelViewSet):
+    queryset = models.Product.objects.all()
+    serializer_class = serializers.ProductSerializer
+    filter_class = filters.ProductFilter

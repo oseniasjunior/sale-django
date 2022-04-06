@@ -77,6 +77,12 @@ class SaleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Product
+        fields = '__all__'
+
+
 class SaleTotalByYearSerializer(serializers.Serializer):
     year = serializers.IntegerField(read_only=True, source='date__year')
     month = serializers.IntegerField(read_only=True, source='date__month')
