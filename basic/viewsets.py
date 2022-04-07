@@ -46,6 +46,10 @@ class SupplierModelViewSet(viewsets.ModelViewSet):
     queryset = models.Supplier.objects.all()
     serializer_class = serializers.SupplierSerializer
 
+    def list(self, request, *args, **kwargs):
+        self.queryset = self.queryset.prefetch_related('product_set')
+        return super(SupplierModelViewSet, self).list(request, *args, **kwargs)
+
 
 class StateModelViewSet(viewsets.ModelViewSet):
     queryset = models.State.objects.all()
@@ -104,3 +108,15 @@ class ProductModelViewSet(viewsets.ModelViewSet):
     queryset = models.Product.objects.all()
     serializer_class = serializers.ProductSerializer
     filter_class = filters.ProductFilter
+
+    def list(self, request, *args, **kwargs):
+        expand = request.query_params.get('expand', None)
+        if expand is not None:
+            relations = expand.split(',')
+            for r in relations:
+                self.queryset = self.queryset.select_related(r)
+        return super(ProductModelViewSet, self).list(request, *args, **kwargs)
+
+    # def retrieve(self, request, *args, **kwargs):
+    #     self.queryset = self.queryset.select_related('supplier')
+    #     return super(ProductModelViewSet, self).retrieve(request, *args, **kwargs)

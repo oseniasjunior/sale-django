@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from basic import models
+from rest_flex_fields import FlexFieldsModelSerializer
 
 
 class ZoneSerializer(serializers.ModelSerializer):
@@ -53,10 +54,14 @@ class ProductGroupSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class SupplierSerializer(serializers.ModelSerializer):
+class SupplierSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = models.Supplier
         fields = '__all__'
+
+    expandable_fields = {
+        'products': ('basic.ProductSerializer', {'source': 'product_set', 'many': True})
+    }
 
 
 class StateSerializer(serializers.ModelSerializer):
@@ -77,10 +82,15 @@ class SaleSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class ProductSerializer(serializers.ModelSerializer):
+class ProductSerializer(FlexFieldsModelSerializer):
     class Meta:
         model = models.Product
         fields = '__all__'
+
+    expandable_fields = {
+        'product_group': ('basic.ProductGroupSerializer',),
+        'supplier': ('basic.SupplierSerializer',)
+    }
 
 
 class SaleTotalByYearSerializer(serializers.Serializer):
