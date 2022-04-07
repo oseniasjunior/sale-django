@@ -1,8 +1,10 @@
+from kombu import BrokerConnection
+from kombu.exceptions import OperationalError
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from basic import models, serializers, serializers_results, serializers_params, filters
+from basic import models, serializers, tasks, filters
 
 
 # POST
@@ -77,31 +79,11 @@ class SaleModelViewSet(viewsets.ModelViewSet):
 
     @action(methods=['GET'], detail=False)
     def total_by_year(self, request, *args, **kwargs):
-        queryset = models.Sale.objects.by_year()
-        # queryset = helpers.execute_query(
-        #     query=f"""
-        #
-        #     """
-        # )
-        # queryset = models.Sale.objects.raw(
-        #     """
-        #          SELECT EXTRACT('year' FROM s.date)::INTEGER     AS year,
-        #                EXTRACT('month' FROM s.date)::INTEGER   AS month,
-        #                SUM(p.sale_price * si.quantity) AS total
-        #         FROM sale s
-        #                  INNER JOIN sale_item si ON s.id = si.id_sale
-        #                  INNER JOIN product p ON si.id_product = p.id
-        #         GROUP BY EXTRACT('year' FROM s.date), EXTRACT('month' FROM s.date)
-        #         ORDER BY EXTRACT('year' FROM s.date) DESC, EXTRACT('month' FROM s.date) DESC
-        #     """
-        # )
-        # rows = [dict(zip(queryset.columns, row)) for row in [q for q in queryset.query]]
-        # result = serializers_results.SaleTotalByYearSerializer(
-        #     instance=queryset,
-        #     many=True,
-        #     context=self.get_serializer_context()
-        # )
-        return Response(data=queryset, status=200)
+        try:
+            tasks.sale_by_year.apply_async([])
+        except OperationalError as error:
+            raise Exception(f'Broker connection error {error}')
+        return Response(status=200)
 
 
 class ProductModelViewSet(viewsets.ModelViewSet):
@@ -120,3 +102,27 @@ class ProductModelViewSet(viewsets.ModelViewSet):
     # def retrieve(self, request, *args, **kwargs):
     #     self.queryset = self.queryset.select_related('supplier')
     #     return super(ProductModelViewSet, self).retrieve(request, *args, **kwargs)
+
+# queryset = helpers.execute_query(
+#     query=f"""
+#
+#     """
+# )
+# queryset = models.Sale.objects.raw(
+#     """
+#          SELECT EXTRACT('year' FROM s.date)::INTEGER     AS year,
+#                EXTRACT('month' FROM s.date)::INTEGER   AS month,
+#                SUM(p.sale_price * si.quantity) AS total
+#         FROM sale s
+#                  INNER JOIN sale_item si ON s.id = si.id_sale
+#                  INNER JOIN product p ON si.id_product = p.id
+#         GROUP BY EXTRACT('year' FROM s.date), EXTRACT('month' FROM s.date)
+#         ORDER BY EXTRACT('year' FROM s.date) DESC, EXTRACT('month' FROM s.date) DESC
+#     """
+# )
+# rows = [dict(zip(queryset.columns, row)) for row in [q for q in queryset.query]]
+# result = serializers_results.SaleTotalByYearSerializer(
+#     instance=queryset,
+#     many=True,
+#     context=self.get_serializer_context()
+# )
