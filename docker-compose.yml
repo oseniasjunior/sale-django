@@ -15,6 +15,12 @@ services:
     working_dir: /usr/src/app
     command: /bin/sh -c "python wait.py redis 6379 180 && python -u -m celery -A sale worker --loglevel INFO --pool=gevent -Q default"
 
+  worker_periodic:
+    restart: always
+    image: sale:1.0.0
+    working_dir: /usr/src/app
+    command: /bin/sh -c "python wait.py redis 6379 180 && python -u -m celery -A sale worker --loglevel INFO --pool=solo -B -Q periodic"
+
   daphne:
     restart: always
     image: sale:1.0.0

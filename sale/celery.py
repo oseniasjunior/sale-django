@@ -10,7 +10,16 @@ app.config_from_object('django.conf:settings', namespace='CELERY')
 
 app.conf.task_queues = (
     Queue('default', Exchange('default'), routing_key='default'),
+    Queue('periodic', Exchange('periodic'), routing_key='periodic'),
 )
 
+TASKS = {
+    'periodic_task': {
+        'task': 'basic.tasks.periodic_task',
+        'schedule': 5
+    }
+}
+
+app.conf.beat_schedule = TASKS
 app.autodiscover_tasks()
 app.conf.timezone = 'America/Manaus'
