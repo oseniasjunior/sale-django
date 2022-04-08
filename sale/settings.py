@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'basic.apps.BasicConfig',
     'rest_framework',
+    'rest_framework.authtoken',
     'django_filters',
     'channels',
 ]
@@ -85,7 +86,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'sale3',
-        'HOST': 'postgres',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
         'USER': 'postgres',
         'PASSWORD': '123456'
@@ -163,7 +164,14 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': (
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
-    )
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+# 'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.DjangoModelPermissions',
+    ),
 }
 
 CELERY_BROKER_URL = 'redis://redis:6379/0'
@@ -180,3 +188,7 @@ CHANNEL_LAYERS = {
         }
     }
 }
+
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+)
