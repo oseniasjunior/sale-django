@@ -1,0 +1,35 @@
+version: '3'
+services:
+
+  api:
+    restart: always
+    image: sale:1.0.0
+    ports:
+      - "8000:8000"
+    working_dir: /usr/src/app
+    command: /bin/sh -c "python -u manage.py migrate && python -u production-server.py --port=8000"
+
+  worker_default:
+    restart: always
+    image: sale:1.0.0
+    working_dir: /usr/src/app
+    command: /bin/sh -c "python wait.py redis 6379 180 && python -u -m celery -A sale worker --loglevel INFO --pool=gevent -Q default"
+
+  daphne:
+    restart: always
+    image: sale:1.0.0
+    ports:
+      - "7000:7000"
+    working_dir: /usr/src/app
+    command: /bin/sh -c "python wait.py redis 6379 180 && daphne -b 0.0.0.0 -p 7000 sale.asgi:application"
+
+  redis:
+    restart: always
+    image: redis
+    ports:
+      - "6379:6379"
+
+networks:
+  default:
+    external:
+      name: backend

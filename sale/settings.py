@@ -85,7 +85,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'sale3',
-        'HOST': 'localhost',
+        'HOST': 'postgres',
         'PORT': '5432',
         'USER': 'postgres',
         'PASSWORD': '123456'
@@ -166,7 +166,7 @@ REST_FRAMEWORK = {
     )
 }
 
-CELERY_BROKER_URL = 'redis://127.0.0.1:6379/0'
+CELERY_BROKER_URL = 'redis://redis:6379/0'
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_ENABLE_UTC = True
 CELERY_TASK_SERIALIZER = 'json'
@@ -176,7 +176,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [('127.0.0.1', 6379,)]
+            'hosts': [('redis', 6379,)]
         }
     }
 }
