@@ -1,3 +1,5 @@
+from time import sleep
+
 from basic import models
 
 
@@ -13,4 +15,6 @@ class SaleActions:
         results = models.Sale.objects.by_year()
         results = map(lambda item: f"{item['year']}, {item['month']}, {item['total']}\n", results)
         with open('sale_by_year.txt', 'a') as file:
-            file.writelines(results)
+            for r in results:
+                file.write(r)
+                sleep(0.5)
