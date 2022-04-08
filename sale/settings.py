@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+from corsheaders.defaults import default_methods
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Quick-start development settings - unsuitable for production
@@ -38,6 +40,7 @@ INSTALLED_APPS = [
     'basic.apps.BasicConfig',
     'rest_framework',
     'django_filters',
+    'channels',
 ]
 
 MIDDLEWARE = [
@@ -48,7 +51,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
 ]
+
+CORS_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_METHODS = default_methods
 
 ROOT_URLCONF = 'sale.urls'
 
@@ -69,6 +76,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'sale.wsgi.application'
+ASGI_APPLICATION = 'sale.asgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
@@ -163,3 +171,12 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_ENABLE_UTC = True
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            'hosts': [('127.0.0.1', 6379,)]
+        }
+    }
+}
