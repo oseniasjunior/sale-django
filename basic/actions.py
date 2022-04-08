@@ -20,4 +20,4 @@ class SaleActions:
                 file.write(row)
                 percentage = (index / counter) * 100
                 helpers.send_channel_message('chat', {'message': percentage})
-                sleep(0.5)
+                sleep(0.2)
